@@ -14,7 +14,7 @@ interface CardInterfaceProps {
   backendName: string;
 }
 
-const CardInterface: React.FC<CardInterfaceProps> = ({ backendName }) => {
+const CardInterface: React.FC<CardInterfaceProps> = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
 
@@ -23,7 +23,7 @@ const CardInterface: React.FC<CardInterfaceProps> = ({ backendName }) => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${apiUrl}/api/${backendName}/foodItems`, {
+        const response = await axios.get(`${apiUrl}/api/go/foodItems`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -35,7 +35,7 @@ const CardInterface: React.FC<CardInterfaceProps> = ({ backendName }) => {
     };
 
     fetchData();
-  }, [backendName, apiUrl]);
+  }, [apiUrl]);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">

@@ -16,7 +16,7 @@ const Home: React.FC = () => {
         <FoodItemTable/>
       </div>
       <div className="col-span-1 m-2 overflow-auto max-h-[calc(4*4rem)] scrollbar-hide">
-        <CardComponent backendName="go" />
+        <CardComponent/>
       </div>
     </main>
   );
