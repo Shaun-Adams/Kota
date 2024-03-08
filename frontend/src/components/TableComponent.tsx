@@ -255,10 +255,10 @@ const [page, setPage] = React.useState(1);
           onChange={setPage}
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
-        <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onPreviousPage} className="bg-gradient-to-r from-yellow-300 to-yellow-500 backdrop-filter backdrop-blur-md text-black px-4 py-2 rounded-lg">
+        <Button isDisabled={pages === 1} size="sm" onPress={onPreviousPage} className="bg-gradient-to-r from-yellow-300 to-yellow-500 backdrop-filter backdrop-blur-md text-black px-4 py-2 rounded-lg">
           Previous
         </Button>
-        <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={onNextPage} className="bg-[#F4538A] backdrop-filter backdrop-blur-md text-black px-4 py-2 rounded-lg">
+        <Button isDisabled={pages === 1} size="sm" onPress={onNextPage} color='danger'>
           Next
         </Button>
         </div>
@@ -267,16 +267,16 @@ const [page, setPage] = React.useState(1);
   }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
 
   return (
-    <div className="table-container">
-      <Table
-      aria-label="Example table with custom cells, pagination and sorting"
-      isStriped
-      isHeaderSticky
-      bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      classNames={{
-        wrapper: "max-h-[382px]",
-      }}
+  <div className="table-container w-full">
+    <Table
+    aria-label="Example table with custom cells, pagination and sorting"
+    isStriped
+    isHeaderSticky
+    bottomContent={bottomContent}
+    bottomContentPlacement="outside"
+    classNames={{
+      wrapper: "max-h-[382px]",
+    }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
       sortDescriptor={sortDescriptor}

@@ -9,11 +9,22 @@ interface FoodItem {
   quantity: number;
 }
 
+interface Column {
+  key: 'icon' | 'item' | 'status'; // Explicitly define the possible keys
+  label: string;
+}
+
+interface Row {
+  key: number;
+  icon: JSX.Element;
+  item: string;
+  status: string;
+}
+
 const FoodItemTable: React.FC = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
 
-  // Fetch all foodItems
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,7 +40,7 @@ const FoodItemTable: React.FC = () => {
 
   const relevantItems = foodItems.filter(item => item.quantity === 0 || (item.quantity > 0 && item.quantity <= 6));
 
-  const columns = [
+  const columns: Column[] = [
     { key: 'icon', label: 'Icon' },
     { key: 'item', label: 'Item Name' },
     { key: 'status', label: 'Quantity Status' },
@@ -43,14 +54,20 @@ const FoodItemTable: React.FC = () => {
   }));
 
   return (
-    <Table aria-label="Food items table with dynamic content">
+    <Table aria-label="Food items table with dynamic content" isHeaderSticky isStriped>
       <TableHeader columns={columns}>
         {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
       </TableHeader>
       <TableBody items={rows}>
         {(item) => (
           <TableRow key={item.key}>
-            {(columnKey) => <TableCell>{item[columnKey]}</TableCell>}
+            {columns.map(column => (
+              <TableCell key={column.key}>
+                {column.key === 'icon' ? item.icon :
+                 column.key === 'item' ? item.item :
+                 item.status}
+              </TableCell>
+            ))}
           </TableRow>
         )}
       </TableBody>
