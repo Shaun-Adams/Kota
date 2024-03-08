@@ -1,15 +1,15 @@
-// pages/login.tsx
+// pages/Register.tsx
 
 import React, { useState } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import Router from 'next/router';
 
-const Login: React.FC = () => {
+const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
-    const response = await fetch('http://localhost:8000/api/go/login', {
+  const handleRegister = async () => {
+    const response = await fetch('http://localhost:8000/api/go/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,9 +18,9 @@ const Login: React.FC = () => {
     });
 
     if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem('token', data.token); // Store the token
-      Router.push('/'); // Redirect to the homepage
+      // const data = await response.json();
+      // localStorage.setItem('token', data.token); // Store the token
+      Router.push('/login'); // Redirect to the homepage
     } else {
       alert('Failed to log in');
     }
@@ -39,15 +39,13 @@ const Login: React.FC = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button onClick={handleLogin} className="bg-gradient-to-r from-yellow-300 to-yellow-500 backdrop-filter backdrop-blur-md text-black px-4 py-2 rounded-lg">Log in</Button>
-        <Button  color='danger' onClick={() => Router.push('/register')}>
-            Dont have an account? Register
+        <Button onClick={handleRegister} className="bg-gradient-to-r from-yellow-300 to-yellow-500 backdrop-filter backdrop-blur-md text-black px-4 py-2 rounded-lg">Register</Button>
+        <Button  color='danger' onClick={() => Router.push('/login')} >
+            Already have an account? Log in
         </Button>
       </div>
     </div>
-
-    
   );
 };
 
-export default Login;
+export default Register;
