@@ -10,11 +10,7 @@ interface FoodItem {
   quantity: number;
 }
 
-interface CardInterfaceProps {
-  backendName: string;
-}
-
-const CardInterface: React.FC<CardInterfaceProps> = () => {
+const CardInterface: React.FC = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
 
