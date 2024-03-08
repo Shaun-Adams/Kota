@@ -284,7 +284,7 @@ function TableComponent() {
     bottomContent={bottomContent}
     bottomContentPlacement="outside"
     classNames={{
-      wrapper: "max-h-[382px]",
+      wrapper: "max-h-[calc(5*4rem)]",
     }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
