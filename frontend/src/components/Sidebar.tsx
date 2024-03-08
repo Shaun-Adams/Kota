@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { List, ListItem, ListItemText, Divider } from '@mui/material';
-// import kotaImage from '../assets/kota.jpg'; // Ensure this import is correct
 import { useRouter } from 'next/router';
+import { Image } from "@nextui-org/react";
 import { Button } from '@nextui-org/react';
+import img from "../assets/kota.jpg";
 
 const Sidebar = () => {
   const router = useRouter();
@@ -18,7 +19,12 @@ const Sidebar = () => {
   return (
     <div className="flex flex-col h-screen w-64 p-4" style={{ backgroundColor: 'rgb(250, 200, 0)' }}>
       <div className="flex items-center justify-center mt-10">
-          {/* <img src={kotaImage.src} alt="Kota Shop Logo" className="w-20 h-20 rounded-full cursor-pointer" /> */}
+        <Image
+          alt="Kota Shop Logo" 
+          className="w-20 h-20 rounded-full cursor-pointer"
+          src={img.src}
+          width={270}
+        />
       </div>
       <List className="mt-10">
         <Link href="/" passHref>

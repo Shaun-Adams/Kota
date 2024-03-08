@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, CardBody, CardFooter, Image } from "@nextui-org/react";
-// import img from '../assets/burger.png';
+import img from "../assets/burger.png";
 
 interface FoodItem {
   id: number;
@@ -43,7 +43,12 @@ const CardInterface: React.FC<CardInterfaceProps> = ({ backendName }) => {
         <Card key={item.id} shadow="sm" isPressable>
           <CardBody className="pt-3">
             <div className="relative flex flex-col items-center">
-              {/* <Image className="w-10 h-10" src={img.src} alt="Burger" /> */}
+            <Image
+                alt="Burger"
+                className="w-10 h-10"
+                src={img.src}
+                width={270}
+              />
                 <div>
                   <b>{item.item}</b>
                 </div>
