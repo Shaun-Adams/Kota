@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/react';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Image } from '@nextui-org/react';
 import img from '../assets/burger.png';
 
 interface FoodItem {
@@ -48,7 +48,7 @@ const FoodItemTable: React.FC = () => {
 
   const rows = relevantItems.map(item => ({
     key: item.id,
-    icon: <img className="w-10 h-10" src={img.src} alt="Burger" />,
+    icon: <Image className="w-10 h-10" src={img.src} alt="Burger" />,
     item: item.item,
     status: item.quantity === 0 ? 'Out of Stock' : 'Low on Stock',
   }));

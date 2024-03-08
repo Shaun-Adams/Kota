@@ -1,8 +1,7 @@
-// handler/user.go
 package handler
 
 import (
-	"api/model" // Adjust the import path to where your models are located.
+	"api/model"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -13,36 +12,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
-
-type Claims struct {
-    Username string `json:"username"`
-    jwt.StandardClaims
-}
-type Credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
+var jwtKey = os.Getenv("JWT_SECRET")
 
 func Register(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var creds Credentials
-		if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		var u model.User
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), bcrypt.DefaultCost)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 		if err != nil {
-			http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		// Insert into your user table. Ensure you have a unique constraint on the username to prevent duplicates.
-		_, err = db.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", creds.Username, string(hashedPassword))
+		_, err = db.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", u.Username, string(hashedPassword))
 		if err != nil {
-			// Handle errors, possibly checking for duplicate username
-			http.Error(w, "Username already taken", http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -52,41 +40,33 @@ func Register(db *sql.DB) http.HandlerFunc {
 
 func Login(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var creds Credentials
-		var user model.User
-
-		if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		var u model.User
+		var dbUser model.User
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		err := db.QueryRow("SELECT id, password FROM users WHERE username = $1", creds.Username).Scan(&user.ID, &user.Password)
+		err := db.QueryRow("SELECT id, password FROM users WHERE username = $1", u.Username).Scan(&dbUser.Id, &dbUser.Password)
 		if err != nil {
-			if err == sql.ErrNoRows {
-				http.Error(w, "User not found", http.StatusUnauthorized)
-			} else {
-				http.Error(w, "Server error", http.StatusInternalServerError)
-			}
+			http.Error(w, "User not found", http.StatusNotFound)
 			return
 		}
 
-		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(creds.Password)); err != nil {
-			http.Error(w, "Bad credentials", http.StatusUnauthorized)
+		if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(u.Password)); err != nil {
+			http.Error(w, "Invalid login credentials", http.StatusUnauthorized)
 			return
 		}
 
 		expirationTime := time.Now().Add(5 * time.Minute)
-		claims := &Claims{
-			Username: creds.Username,
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: expirationTime.Unix(),
-			},
-		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"username": u.Username,
+			"exp":      expirationTime.Unix(),
+		})
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		tokenString, err := token.SignedString(jwtKey)
 		if err != nil {
-			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 

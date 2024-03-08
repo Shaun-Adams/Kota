@@ -38,7 +38,7 @@ const CardInterface: React.FC<CardInterfaceProps> = ({ backendName }) => {
         <Card key={item.id} shadow="sm" isPressable>
           <CardBody className="pt-3">
             <div className="relative flex flex-col items-center">
-              <img className="w-10 h-10" src={img.src} alt="Burger" />
+              <Image className="w-10 h-10" src={img.src} alt="Burger" />
                 <div>
                   <b>{item.item}</b>
                 </div>

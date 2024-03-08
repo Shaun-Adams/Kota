@@ -15,9 +15,7 @@ const Sidebar = () => {
   return (
     <div className="flex flex-col h-screen w-64 p-4" style={{ backgroundColor: 'rgb(250, 200, 0)' }}>
       <div className="flex items-center justify-center mt-10">
-        <Link href="/" passHref>
-          <img src={kotaImage.src} alt="Kota Shop Logo" className="w-20 h-20 rounded-full cursor-pointer" />
-        </Link>
+          {/* <img src={kotaImage.src} alt="Kota Shop Logo" className="w-20 h-20 rounded-full cursor-pointer" /> */}
       </div>
       <List className="mt-10">
         {/* Correctly wrap ListItem with Link */}
