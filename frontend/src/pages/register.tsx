@@ -28,6 +28,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
+      <h2 className="text-3xl font-bold mb-4">Register</h2>
       <div className="flex flex-col gap-4">
         <Input
           placeholder="Username"
