@@ -35,7 +35,7 @@ interface FoodItem {
 
 const INITIAL_VISIBLE_COLUMNS = ["id", "item", "description", "quantity", "actions"];
 
-function App() {
+function TableComponent() {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
@@ -50,22 +50,28 @@ function App() {
 
   // Fetch all foodItems
   useEffect(() => {
-    const fetchFoodItems = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/api/go/foodItems`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${apiUrl}/api/go/foodItems`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setFoodItems(response.data.reverse());
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-    fetchFoodItems();
-  }, []);
 
-const addFoodItem = (newItem: FoodItem) => {
-    setFoodItems((prevItems) => [newItem, ...prevItems]);
-};
+    fetchData();
+  }, [apiUrl]);
 
-const [page, setPage] = React.useState(1);
+  const addFoodItem = (newItem: FoodItem) => {
+    setFoodItems(prevItems => [...prevItems, newItem].reverse());
+  };
+
+  const [page, setPage] = React.useState(1);
 
   const hasSearchFilter = Boolean(filterValue);
 
@@ -107,16 +113,19 @@ const [page, setPage] = React.useState(1);
   }, [sortDescriptor, items]);
 
  
-  // Delete a foodItem
-    const deleteFoodItem = async (foodItemId: number) => {
-        try {
-            await axios.delete(`${apiUrl}/api/go/foodItems/${foodItemId}`);
-            setFoodItems((currentFoodItems) => currentFoodItems.filter((foodItem) => foodItem.id !== foodItemId));
-            } 
-        catch (error) {
-            console.error('Error deleting foodItem:', error);
-        }
-    };
+  const deleteFoodItem = async (id: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${apiUrl}/api/go/foodItems/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Directly updating the state to reflect the deletion without needing to refetch the entire list
+      setFoodItems(currentItems => currentItems.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Failed to delete food item', error);
+    }
+  };
+
   
 
   const renderCell = React.useCallback((foodItem: FoodItem, columnKey: React.Key) => {
@@ -308,4 +317,4 @@ const [page, setPage] = React.useState(1);
   );
 }
 
-export default App;
+export default TableComponent;

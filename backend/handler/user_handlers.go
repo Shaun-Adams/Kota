@@ -5,75 +5,85 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/dgrijalva/jwt-go"
+	"os"
 )
 
-var jwtKey = os.Getenv("JWT_SECRET")
+// UserClaims extends StandardClaims for JWT
+type UserClaims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
 
+// Register a new user
 func Register(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var u model.User
-		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		var user model.User
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			http.Error(w, "Invalid request payload", http.StatusBadRequest)
 			return
 		}
 
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 			return
 		}
 
-		_, err = db.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", u.Username, string(hashedPassword))
+		_, err = db.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", user.Username, string(hashedPassword))
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Failed to register user", http.StatusInternalServerError)
 			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode("User successfully registered")
 	}
 }
 
+// Login authenticates a user and returns a JWT
 func Login(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var u model.User
-		var dbUser model.User
-		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		err := db.QueryRow("SELECT id, password FROM users WHERE username = $1", u.Username).Scan(&dbUser.Id, &dbUser.Password)
+		var user model.User
+		var hashedPassword string
+		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
-			http.Error(w, "User not found", http.StatusNotFound)
+			http.Error(w, "Invalid request payload", http.StatusBadRequest)
 			return
 		}
 
-		if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(u.Password)); err != nil {
-			http.Error(w, "Invalid login credentials", http.StatusUnauthorized)
-			return
-		}
-
-		expirationTime := time.Now().Add(5 * time.Minute)
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"username": u.Username,
-			"exp":      expirationTime.Unix(),
-		})
-
-		tokenString, err := token.SignedString(jwtKey)
+		err = db.QueryRow("SELECT password FROM users WHERE username = $1", user.Username).Scan(&hashedPassword)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
 			return
 		}
 
-		http.SetCookie(w, &http.Cookie{
-			Name:    "token",
-			Value:   tokenString,
-			Expires: expirationTime,
+		err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(user.Password))
+		if err != nil {
+			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+			return
+		}
+
+		expirationTime := time.Now().Add(1 * time.Hour)
+		claims := &UserClaims{
+			Username: user.Username,
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: expirationTime.Unix(),
+			},
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+		if err != nil {
+			http.Error(w, "Failed to sign token", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"token": tokenString,
 		})
 	}
 }

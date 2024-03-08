@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Image } from '@nextui-org/react';
-import img from '../assets/burger.png';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/react';
+// import img from '../assets/burger.png';
 
 interface FoodItem {
   id: number;
@@ -16,7 +16,7 @@ interface Column {
 
 interface Row {
   key: number;
-  icon: JSX.Element;
+  // icon: JSX.Element;
   item: string;
   status: string;
 }
@@ -28,7 +28,12 @@ const FoodItemTable: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/api/go/foodItems`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${apiUrl}/api/go/foodItems`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setFoodItems(response.data.reverse());
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -46,15 +51,14 @@ const FoodItemTable: React.FC = () => {
     { key: 'status', label: 'Quantity Status' },
   ];
 
-  const rows = relevantItems.map(item => ({
+  const rows: Row[] = relevantItems.map(item => ({
     key: item.id,
-    icon: <Image className="w-10 h-10" src={img.src} alt="Burger" />,
     item: item.item,
     status: item.quantity === 0 ? 'Out of Stock' : 'Low on Stock',
   }));
 
   return (
-    <Table aria-label="Food items table with dynamic content" isHeaderSticky isStriped>
+    <Table aria-label="Food items table with dynamic content">
       <TableHeader columns={columns}>
         {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
       </TableHeader>
@@ -63,7 +67,7 @@ const FoodItemTable: React.FC = () => {
           <TableRow key={item.key}>
             {columns.map(column => (
               <TableCell key={column.key}>
-                {column.key === 'icon' ? item.icon :
+                { 
                  column.key === 'item' ? item.item :
                  item.status}
               </TableCell>

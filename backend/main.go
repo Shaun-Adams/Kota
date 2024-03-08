@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 	"api/handler"
 	"api/database"
+	"github.com/gorilla/handlers"
 )
 
 func main() {
@@ -22,41 +23,31 @@ func main() {
 
 	router := mux.NewRouter()
 
+	// Register your routes
+	// Public routes
 	router.HandleFunc("/api/go/register", handler.Register(database)).Methods("POST")
 	router.HandleFunc("/api/go/login", handler.Login(database)).Methods("POST")
 
+	// Secured routes
+	securedRouter := router.PathPrefix("/api/go").Subrouter()
+	securedRouter.Use(handler.JWTMiddleware)
+	securedRouter.HandleFunc("/foodItems", handler.GetFoodItems(database)).Methods("GET")
+	securedRouter.HandleFunc("/foodItems/{id}", handler.GetFoodItem(database)).Methods("GET")
+	securedRouter.HandleFunc("/foodItems", handler.CreateFoodItem(database)).Methods("POST")
+	securedRouter.HandleFunc("/foodItems/{id}", handler.UpdateFoodItem(database)).Methods("PUT")
+	securedRouter.HandleFunc("/foodItems/{id}", handler.DeleteFoodItem(database)).Methods("DELETE")
 
-	// In your main function, wrap the food item routes with the Authenticate middleware
-	router.Handle("/api/go/foodItems", handler.JWTMiddleware(handler.GetFoodItems(database))).Methods("GET")
-	router.Handle("/api/go/foodItems", handler.JWTMiddleware(handler.CreateFoodItem(database))).Methods("POST")
-	router.Handle("/api/go/foodItems/{id}", handler.JWTMiddleware(handler.GetFoodItem(database))).Methods("GET")
-	router.Handle("/api/go/foodItems/{id}", handler.JWTMiddleware(handler.UpdateFoodItem(database))).Methods("PUT")
-	router.Handle("/api/go/foodItems/{id}", handler.JWTMiddleware(handler.DeleteFoodItem(database))).Methods("DELETE")
+	// Setup CORS using gorilla/handlers
+	corsObj := handlers.CORS(
+		handlers.AllowedOrigins([]string{"*"}), // Adjust in production
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+		handlers.AllowCredentials(),
+	)
 
+	// Apply the CORS middleware to our router, with the corsObj configuration
+	http.Handle("/", corsObj(router))
 
-	enhancedRouter := handler.EnableCORS(handler.JsonContentTypeMiddleware(router))
-
-	log.Fatal(http.ListenAndServe(":8000", enhancedRouter))
-
-
-
-	// Register your routes here
-	// Public routes
-	// router.HandleFunc("/api/go/register", handler.Register(database)).Methods("POST")
-	// router.HandleFunc("/api/go/login", handler.Login(database)).Methods("POST")
-
-	// // Secured routes
-	// securedRouter := router.PathPrefix("/api/go").Subrouter()
-	// securedRouter.Use(handler.JWTMiddleware)
-	// securedRouter.HandleFunc("/foodItems", handler.GetFoodItems(database)).Methods("GET")
-	// securedRouter.HandleFunc("/foodItems/{id}", handler.GetFoodItem(database)).Methods("GET")
-	// securedRouter.HandleFunc("/foodItems", handler.CreateFoodItem(database)).Methods("POST")
-	// securedRouter.HandleFunc("/foodItems/{id}", handler.UpdateFoodItem(database)).Methods("PUT")
-	// securedRouter.HandleFunc("/foodItems/{id}", handler.DeleteFoodItem(database)).Methods("DELETE")
-
-	// // Apply middlewares
-	// router.Use(handler.EnableCORS)
-	// router.Use(handler.JsonContentTypeMiddleware)
-
-	// log.Fatal(http.ListenAndServe(":8000", router))
+	log.Println("Server is running on port 8000")
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }

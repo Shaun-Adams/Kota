@@ -9,11 +9,9 @@ interface FoodItem {
   quantity: number;
 }
 
-export default function ModalComponent({ onAddFoodItem }: { onAddFoodItem: any }) {
+export default function ModalComponent({ onAddFoodItem }: { onAddFoodItem: (foodItem: FoodItem) => void }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-
   const [newFoodItem, setNewFoodItem] = useState({ item: '', description: '', quantity: 0 });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,12 +26,29 @@ export default function ModalComponent({ onAddFoodItem }: { onAddFoodItem: any }
     }
 
     try {
-      const response = await axios.post(`${apiUrl}/api/go/foodItems`, newFoodItem);
-      onAddFoodItem(response.data); // Use the callback to update the parent component
+      const token = localStorage.getItem('token'); // Retrieve the stored JWT token
+      if (!token) {
+        console.error("JWT token is not available.");
+        return;
+      }
+
+      const response = await axios.post(
+        `${apiUrl}/api/go/foodItems`, 
+        newFoodItem, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Include the JWT token in the request
+          },
+        }
+      );
+
+      onAddFoodItem(response.data); // Use the callback to update the parent component with the new food item
       setNewFoodItem({ item: '', description: '', quantity: 0 }); // Reset form
       onClose(); // Close the modal
     } catch (error) {
       console.error('Error adding new food item:', error);
+      alert('Failed to add food item. Please try again.');
     }
   };
 
@@ -43,37 +58,13 @@ export default function ModalComponent({ onAddFoodItem }: { onAddFoodItem: any }
         Add New
       </Button>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        closeButton
-      >
+      <Modal isOpen={isOpen} onClose={onClose} closeButton>
         <ModalContent>
-          <ModalHeader>Food Item</ModalHeader>
+          <ModalHeader>Add a New Food Item</ModalHeader>
           <ModalBody>
-            <Input
-              autoFocus
-              label="Item"
-              placeholder="Enter item name"
-              value={newFoodItem.item}
-              onChange={handleInputChange}
-              name="item"
-            />
-            <Input
-              label="Description"
-              placeholder="Enter description"
-              value={newFoodItem.description}
-              onChange={handleInputChange}
-              name="description"
-            />
-            <Input
-              label="Quantity"
-              placeholder="Enter quantity"
-              type="number"
-              value={newFoodItem.quantity.toString()}
-              onChange={handleInputChange}
-              name="quantity"
-            />
+            <Input autoFocus label="Item" placeholder="Enter item name" value={newFoodItem.item} onChange={handleInputChange} name="item" />
+            <Input label="Description" placeholder="Enter description" value={newFoodItem.description} onChange={handleInputChange} name="description" />
+            <Input label="Quantity" placeholder="Enter quantity" type="number" value={newFoodItem.quantity.toString()} onChange={handleInputChange} name="quantity" />
           </ModalBody>
           <ModalFooter>
             <Button color="danger" onPress={onClose}>
