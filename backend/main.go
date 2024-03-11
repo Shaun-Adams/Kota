@@ -1,33 +1,49 @@
 package main
 
 import (
+	"api/database"
+	"api/handler"
 	"database/sql"
 	"log"
+	"math"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	"api/handler"
-	"api/database"
-	"github.com/gorilla/handlers"
 )
 
 func main() {
 	database, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to open database: %v", err)
 	}
 	defer database.Close()
 
-	db.InitDB(database)
+
+	maxRetries := 5
+	for i := 0; i < maxRetries; i++ {
+		err = database.Ping()
+		if err == nil {
+			break
+		}
+		log.Printf("Could not connect to database: %v", err)
+		time.Sleep(time.Second * time.Duration(math.Pow(2, float64(i)))) 
+	}
+
+	if err != nil {
+		log.Fatalf("Failed to connect to database after %d retries: %v", maxRetries, err)
+	}
+
+	db.InitDB(database) 
 
 	router := mux.NewRouter()
 
-	// Public routes
 	router.HandleFunc("/api/go/register", handler.Register(database)).Methods("POST")
 	router.HandleFunc("/api/go/login", handler.Login(database)).Methods("POST")
 
-	// Secured routes
 	securedRouter := router.PathPrefix("/api/go").Subrouter()
 	securedRouter.Use(handler.JWTMiddleware)
 	securedRouter.HandleFunc("/foodItems", handler.GetFoodItems(database)).Methods("GET")
