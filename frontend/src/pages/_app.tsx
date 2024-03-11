@@ -10,14 +10,12 @@ export default function App({ Component, pageProps }: AppProps) {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get the token from local storage on client side
     const storedToken = localStorage.getItem('token');
     setToken(storedToken);
 
-    // Redirect logic
     const allowedPaths = ['/login', '/register'];
     if (!storedToken && !allowedPaths.includes(router.pathname)) {
-      router.push('/login'); // Redirect to login if no token and not on an allowed path
+      router.push('/login'); 
     }
   }, [router]);
 
@@ -26,7 +24,6 @@ export default function App({ Component, pageProps }: AppProps) {
       <div className="flex">
         {token && <Sidebar />}
         <div className={`flex-grow ${!token ? 'w-full' : ''}`}>
-          {/* Show loading state or null while checking for token */}
           {router.isReady && token !== undefined ? <Component {...pageProps} /> : null}
         </div>
       </div>

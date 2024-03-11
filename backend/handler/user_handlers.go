@@ -11,13 +11,11 @@ import (
 	"os"
 )
 
-// UserClaims extends StandardClaims for JWT
 type UserClaims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
 
-// Register a new user
 func Register(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
@@ -44,7 +42,6 @@ func Register(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// Login authenticates a user and returns a JWT
 func Login(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User

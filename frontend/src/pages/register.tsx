@@ -1,5 +1,3 @@
-// pages/Register.tsx
-
 import React, { useState } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import Router from 'next/router';

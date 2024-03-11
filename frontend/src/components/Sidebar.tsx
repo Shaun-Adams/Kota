@@ -9,11 +9,9 @@ const Sidebar = () => {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Example: Clearing user authentication token
-    localStorage.removeItem('token'); // Assuming 'token' is your stored JWT or authentication token
-    
-    // Redirect to login page
-    router.push('/login'); // Ensure the route matches your login page's path
+    localStorage.removeItem('token'); 
+
+    router.push('/login'); 
   };
 
   return (

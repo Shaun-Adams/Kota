@@ -26,7 +26,7 @@ export default function ModalComponent({ onAddFoodItem }: { onAddFoodItem: (food
     }
 
     try {
-      const token = localStorage.getItem('token'); // Retrieve the stored JWT token
+      const token = localStorage.getItem('token'); 
       if (!token) {
         console.error("JWT token is not available.");
         return;
@@ -38,14 +38,14 @@ export default function ModalComponent({ onAddFoodItem }: { onAddFoodItem: (food
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Include the JWT token in the request
+            'Authorization': `Bearer ${token}`, 
           },
         }
       );
 
-      onAddFoodItem(response.data); // Use the callback to update the parent component with the new food item
-      setNewFoodItem({ item: '', description: '', quantity: 0 }); // Reset form
-      onClose(); // Close the modal
+      onAddFoodItem(response.data); 
+      setNewFoodItem({ item: '', description: '', quantity: 0 }); 
+      onClose(); 
     } catch (error) {
       console.error('Error adding new food item:', error);
       alert('Failed to add food item. Please try again.');

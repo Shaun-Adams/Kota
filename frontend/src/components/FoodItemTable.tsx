@@ -10,7 +10,7 @@ interface FoodItem {
 }
 
 interface Column {
-  key: 'icon' | 'item' | 'status'; // Explicitly define the possible keys
+  key: 'icon' | 'item' | 'status'; 
   label: string;
 }
 

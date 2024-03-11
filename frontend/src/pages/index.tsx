@@ -1,5 +1,3 @@
-// pages/index.js or pages/index.tsx
-
 import React from 'react';
 import CardComponent from '../components/CardComponent';
 import TableComponent from '../components/TableComponent';

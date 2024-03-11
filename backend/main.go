@@ -23,7 +23,6 @@ func main() {
 
 	router := mux.NewRouter()
 
-	// Register your routes
 	// Public routes
 	router.HandleFunc("/api/go/register", handler.Register(database)).Methods("POST")
 	router.HandleFunc("/api/go/login", handler.Login(database)).Methods("POST")
@@ -37,15 +36,13 @@ func main() {
 	securedRouter.HandleFunc("/foodItems/{id}", handler.UpdateFoodItem(database)).Methods("PUT")
 	securedRouter.HandleFunc("/foodItems/{id}", handler.DeleteFoodItem(database)).Methods("DELETE")
 
-	// Setup CORS using gorilla/handlers
 	corsObj := handlers.CORS(
-		handlers.AllowedOrigins([]string{"*"}), // Adjust in production
+		handlers.AllowedOrigins([]string{"*"}), 
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
 		handlers.AllowCredentials(),
 	)
 
-	// Apply the CORS middleware to our router, with the corsObj configuration
 	http.Handle("/", corsObj(router))
 
 	log.Println("Server is running on port 8000")

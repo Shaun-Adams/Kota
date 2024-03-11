@@ -28,7 +28,6 @@ func JsonContentTypeMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// JWTMiddleware verifies the token from the Authorization header
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")

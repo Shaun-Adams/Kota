@@ -119,7 +119,6 @@ function TableComponent() {
       await axios.delete(`${apiUrl}/api/go/foodItems/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // Directly updating the state to reflect the deletion without needing to refetch the entire list
       setFoodItems(currentItems => currentItems.filter(item => item.id !== id));
     } catch (error) {
       console.error('Failed to delete food item', error);
@@ -136,7 +135,6 @@ function TableComponent() {
         return (
             <div className="flex flex-col">
             <p className="text-bold text-small">{cellValue}</p>
-            {/* <p className="text-bold text-tiny text-default-400">{foodItem.item}</p> */}
           </div>
         );
       case "description":

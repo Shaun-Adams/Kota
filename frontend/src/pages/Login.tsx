@@ -1,5 +1,3 @@
-// pages/login.tsx
-
 import React, { useState } from 'react';
 import { Button, Input } from '@nextui-org/react';
 import Router from 'next/router';
@@ -19,8 +17,8 @@ const Login: React.FC = () => {
 
     if (response.ok) {
       const data = await response.json();
-      localStorage.setItem('token', data.token); // Store the token
-      Router.push('/'); // Redirect to the homepage
+      localStorage.setItem('token', data.token);
+      Router.push('/');
     } else {
       alert('Failed to log in');
     }
